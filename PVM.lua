@@ -292,7 +292,7 @@ function PVM:ResetStance(stance_id)
         PVM:Err("No defaults found for weapon %s", weapon_id)
         return
     end
-    PrintT(default)
+
     if not default[stance_id] then
         PVM:Err("No default found for stance ID %s weapon %s", stance_id, weapon_id)
         return
