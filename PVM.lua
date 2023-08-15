@@ -48,8 +48,9 @@ function PVM:CreateItems(menu)
     self._menu = menu
     local accent = BeardLib.Options:GetValue("MenuColor")
     self._holder = self._menu:DivGroup({
-        name = "None",
+        name = "Holder",
         w = 400,
+		text = "Perfect Viewmodel",
         auto_height = false,
         size = 20,
         background_visible = true,
@@ -75,11 +76,10 @@ function PVM:ShowMenu(menu, opened)
 		local weapon_id = self:GetWeaponId()
         local stances = self:GetWeaponStances()
 
-        self._holder:SetText(string.pretty(weapon_id or "Perfect Viewmodel", true))
-        self._holder:KeyBind({name = "ToggleKey", value = self.Options:GetValue("ToggleKey"), text = "Toggle key", on_callback = callback(self, self, "Set")})
-        self._holder:KeyBind({name = "RefreshKey", value = self.Options:GetValue("RefreshKey"), text = "Refresh key", on_callback = callback(self, self, "Set")})
-
-        self._holder:Button({
+        self._settings_group = self._holder:DivGroup({text = "PVM Settings", border_left = true, border_lock_height = true})
+        self._settings_group:KeyBind({name = "ToggleKey", value = self.Options:GetValue("ToggleKey"), text = "Toggle key", on_callback = callback(self, self, "Set")})
+        self._settings_group:KeyBind({name = "RefreshKey", value = self.Options:GetValue("RefreshKey"), text = "Refresh key", on_callback = callback(self, self, "Set")})
+        self._settings_group:Button({
             name = "Reset All Weapons",
             on_callback = function()
                 QuickDialog({
@@ -97,7 +97,9 @@ function PVM:ShowMenu(menu, opened)
         })
 
         if weapon_id then
-            self._holder:Button({
+            self._weapon_group = self._holder:DivGroup({text = weapon_id or "N/A", border_left = true, border_lock_height = true})
+
+            self._weapon_group:Button({
                 name = "Reset Weapon",
                 on_callback = function()
                     QuickDialog({
@@ -112,7 +114,7 @@ function PVM:ShowMenu(menu, opened)
                     end}})
                 end
             })
-            self._holder:Toggle({name = "AllWeaponsMode", value = self._all_weapons_mode, text = "All Weapons Mode", on_callback = function(item) self._all_weapons_mode = item:Value() end})
+            self._weapon_group:Toggle({name = "AllWeaponsMode", value = self._all_weapons_mode, text = "All Weapons Mode", on_callback = function(item) self._all_weapons_mode = item:Value() end})
         end
 
 		for name, stance in pairs(stances) do
@@ -132,6 +134,7 @@ function PVM:ShowMenu(menu, opened)
         self._menu:disable()
     end
 end
+
 function PVM:Set(item)
     local name, value = item.name, item:Value()
     self.Options:SetValue(name, value)
@@ -144,12 +147,13 @@ function PVM:Set(item)
 end
 
 function PVM:StanceEdit(stance_id, pos, is_part)
-    local panel = self._menu:GetMenu(stance_id)
+    local panel = self._weapon_group:GetMenu(stance_id)
     if not panel then
         local toggleable = stance_id == "crouched" or stance_id == "standard" or stance_id == "steelsight"
-        panel = self._holder:DivGroup({
+        panel = self._weapon_group:DivGroup({
             name = stance_id,
-            color = self._holder.accent_color,
+            border_left = true,
+            border_lock_height = true,
             private = {
                 offset = 16,
                 full_bg_color = Color(0.5, 0, 0, 0),
