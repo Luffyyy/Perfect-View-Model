@@ -119,17 +119,16 @@ function PVM:ShowMenu(menu, opened)
             self._weapon_group:Toggle({name = "AllWeaponsMode", value = self._all_weapons_mode, text = "All Weapons Mode", on_callback = function(item) self._all_weapons_mode = item:Value() end})
         end
 
-		for name, stance in pairs(stances) do
-            if not stance.is_part then
-                self:StanceEdit(name, stance.data.translation or Vector3(), false)
-                self:StanceEdit(name, stance.data.rotation or Rotation(), false)
+        local stances_copy = table.map_values(stances, function(a, b)
+            if a.is_part and b.is_part then
+                return a.id < b.id
+            else
+                return not a.is_part
             end
-        end
-        for name, stance in pairs(stances) do
-            if stance.is_part then
-                self:StanceEdit(name, stance.data.translation or Vector3(), true)
-                self:StanceEdit(name, stance.data.rotation or Rotation(), true)
-            end
+        end)
+        for _, stance in pairs(stances_copy) do
+            self:StanceEdit(stance.id, stance.data.translation or Vector3(), true)
+            self:StanceEdit(stance.id, stance.data.rotation or Rotation(), true)
         end
     else
 		game_state_machine:current_state():set_controller_enabled(true)

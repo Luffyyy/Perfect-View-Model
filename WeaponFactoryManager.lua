@@ -8,6 +8,7 @@ function WeaponFactoryManager:get_stances(factory_id, blueprint)
 	for stance_id, stance in pairs(weapon_id and stances_tweak[weapon_id] or stances_tweak.default) do
 		if tonumber(stance_id) == nil and stance.shoulders and not PVM.black_list[stance_id] then
 			stance_mods[stance_id] = {
+				id = stance_id,
 				is_part = false,
 				data = stance.shoulders
 			}
@@ -20,6 +21,7 @@ function WeaponFactoryManager:get_stances(factory_id, blueprint)
 			if part.stance_mod and part.stance_mod[factory_id] then
 				local stance_data = part.stance_mod[factory_id]
 				stance_mods[part_id] = {
+					id = part_id,
 					is_part = true,
 					data = stance_data
 				}
