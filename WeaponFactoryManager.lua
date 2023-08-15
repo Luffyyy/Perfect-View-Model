@@ -1,7 +1,3 @@
-function WeaponFactoryManager:part_data_no_clone(part_id)
-	return tweak_data.weapon.factory.parts[part_id] or {}
-end
-
 function WeaponFactoryManager:get_stances(factory_id, blueprint)
 	local stance_mods = {}
 	local assembled_blueprint =  self:get_assembled_blueprint(factory_id, blueprint)
@@ -20,7 +16,7 @@ function WeaponFactoryManager:get_stances(factory_id, blueprint)
 
 	for _, part_id in ipairs(assembled_blueprint) do
 		if not forbidden[part_id] and not PVM.black_list[part_id] then
-			local part = self:part_data_no_clone(part_id)
+			local part = self:_part_data(part_id, factory_id)
 			if part.stance_mod and part.stance_mod[factory_id] then
 				local stance_data = part.stance_mod[factory_id]
 				stance_mods[part_id] = {
