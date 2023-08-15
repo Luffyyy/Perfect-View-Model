@@ -79,6 +79,8 @@ function PVM:ShowMenu(menu, opened)
         self._settings_group = self._holder:DivGroup({text = "PVM Settings", border_left = true, border_lock_height = true})
         self._settings_group:KeyBind({name = "ToggleKey", value = self.Options:GetValue("ToggleKey"), text = "Toggle key", on_callback = callback(self, self, "Set")})
         self._settings_group:KeyBind({name = "RefreshKey", value = self.Options:GetValue("RefreshKey"), text = "Refresh key", on_callback = callback(self, self, "Set")})
+        self._settings_group:NumberBox({name = "TranslationStep", value = self.Options:GetValue("TranslationStep"), text = "Translation Slider Step", on_callback = callback(self, self, "Set")})
+        self._settings_group:NumberBox({name = "RotationStep", value = self.Options:GetValue("RotationStep"), text = "Rotation Slider Step", on_callback = callback(self, self, "Set")})
         self._settings_group:Button({
             name = "Reset All Weapons",
             on_callback = function()
@@ -144,6 +146,18 @@ function PVM:Set(item)
     if name == "RefreshKey" then
         self.refresh_key = value
     end
+
+    if name == "RotationStep" or name == "TranslationStep" then
+		for name in pairs(self:GetWeaponStances()) do
+            local panel = self._weapon_group:GetMenu(name)
+            if panel then
+                local pos = panel:GetItem(name == "TranslationStep" and "Vector3" or "Rotation")
+                for _, item in pairs(pos:Items()) do
+                    item:SetStep(value)
+                end
+            end
+        end
+    end
 end
 
 function PVM:StanceEdit(stance_id, pos, is_part)
@@ -203,6 +217,9 @@ function PVM:StanceEdit(stance_id, pos, is_part)
         index = not rot and 4,
         align_method = "grid",
     })
+
+    local step = rot and PVM.Options:GetValue("RotationStep") or PVM.Options:GetValue("TranslationStep")
+
     for _, axis in pairs(rot and {"yaw", "pitch", "roll"} or {"x","y","z"}) do
         local value = rot and mrotation[axis](pos) or pos[axis]
         control_panel:NumberBox({
@@ -213,7 +230,7 @@ function PVM:StanceEdit(stance_id, pos, is_part)
             stance_id = stance_id,
             offset = 0,
             w = control_panel.w / 3,
-            step = 1,
+            step = step,
             control_slice = 0.6,
             floats = 3,
             on_callback = callback(self, self, "ItemSetStance"),
