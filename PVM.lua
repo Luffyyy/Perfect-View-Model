@@ -120,8 +120,8 @@ function PVM:ShowMenu(menu, opened)
         end
 
         local stances_copy = table.map_values(stances, function(a, b)
-            if a.is_part and b.is_part then
-                return a.id < b.id
+            if (a.is_part and b.is_part) or (not a.is_part and not b.is_part) then
+                return a.id > b.id
             else
                 return not a.is_part
             end
