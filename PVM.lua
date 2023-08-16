@@ -352,7 +352,7 @@ function PVM:UpgradeSave()
     if saved then
         for _, weapon in pairs(saved) do
             for _, mode in pairs(weapon) do
-                if mode.shoulders then
+                if type(mode) == "table" and mode.shoulders then
                     changed = true
                     mode.translation = mode.shoulders.translation
                     mode.rotation = mode.shoulders.rotation
