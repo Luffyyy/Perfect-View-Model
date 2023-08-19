@@ -294,11 +294,22 @@ function PVM:RefreshState()
     self:ReloadStanceTweak()
 end
 
+PVM._weapon_ids_cache = {}
 function PVM:ReloadStanceTweak()
     for weapon_id, stances in pairs(tweak_data.player.stances) do
         for stance_name, mode in pairs(stances) do
             if mode.shoulders then
                 PVM:SetStanceFromSave(weapon_id, stance_name, mode.shoulders)
+            end
+        end
+    end
+
+    for part_id, data in pairs(tweak_data.weapon.factory) do
+        if data.stance_mods then
+            for factory_id, stance_mod in pairs(data.stance_mods) do
+                local weapon_id = self._weapon_ids_cache[factory_id] or managers.weapon:get_weapon_id_by_factory_id(factory_id)
+                self._weapon_ids_cache[factory_id] = weapon_id
+                PVM:SetStanceFromSave(weapon_id, part_id, stance_mod)
             end
         end
     end

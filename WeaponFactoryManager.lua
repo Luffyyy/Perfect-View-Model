@@ -32,13 +32,4 @@ function WeaponFactoryManager:get_stances(factory_id, blueprint)
 	return stance_mods
 end
 
-WeaponFactoryManager.pvm_part_data = WeaponFactoryManager._part_data
-function WeaponFactoryManager:_part_data(part_id, factory_id, ...)
-	local part = self:pvm_part_data(part_id, factory_id, ...)
-	if part.stance_mod and part.stance_mod[factory_id] then
-		PVM:SetStanceFromSave(self:get_weapon_id_by_factory_id(factory_id) or "default", part_id, part.stance_mod[factory_id])
-	end
-	return part
-end
-
 PVM:ReloadStanceTweak()
