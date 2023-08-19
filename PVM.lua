@@ -1,7 +1,7 @@
 function PVM:Init()
     self.default_stances = {}
 	self.black_list = {mask_off = true, civilian = true, clean = true}
-    self._all_weapons_mode = false
+    self._global_mode = false
 
     self.refresh_key = self.Options:GetValue("RefreshKey")
 
@@ -81,6 +81,14 @@ function PVM:ShowMenu(menu, opened)
         self._settings_group:KeyBind({name = "RefreshKey", value = self.Options:GetValue("RefreshKey"), text = "Refresh key", on_callback = callback(self, self, "Set")})
         self._settings_group:NumberBox({name = "TranslationStep", value = self.Options:GetValue("TranslationStep"), text = "Translation Slider Step", on_callback = callback(self, self, "Set")})
         self._settings_group:NumberBox({name = "RotationStep", value = self.Options:GetValue("RotationStep"), text = "Rotation Slider Step", on_callback = callback(self, self, "Set")})
+        self._settings_group:Toggle({
+            name = "ApplyOnAll",
+            value = self.Options:GetValue("ApplyOnAll"),
+            text = "Allow Global Setting",
+            help = "If enabled, allows for 'Global Mode' which sets a setting for all weapons. If a weapon has its own setting, it'll be used instead of the global.",
+            on_callback = callback(self, self, "Set")
+        })
+
         self._settings_group:Button({
             name = "Reset All Weapons",
             on_callback = function()
@@ -116,7 +124,13 @@ function PVM:ShowMenu(menu, opened)
                     end}})
                 end
             })
-            self._weapon_group:Toggle({name = "AllWeaponsMode", value = self._all_weapons_mode, text = "All Weapons Mode", on_callback = function(item) self._all_weapons_mode = item:Value() end})
+            self._weapon_group:Toggle({
+                name = "GlobalMode",
+                value = self._global_mode,
+                text = "All Weapons Mode",
+                on_callback = function(item) self._global_mode = item:Value() end,
+                visible = self.Options:GetValue("ApplyOnAll")
+            })
         end
 
         local stances_copy = table.map_values(stances, function(a, b)
@@ -144,6 +158,9 @@ function PVM:Set(item)
     end
     if name == "RefreshKey" then
         self.refresh_key = value
+    end
+    if name == "ApplyOnAll" and self._weapon_group then
+        self._weapon_group:GetItem("GlobalMode"):SetVisible(value)
     end
 
     if name == "RotationStep" or name == "TranslationStep" then
@@ -256,7 +273,7 @@ function PVM:ItemSetStance(item)
     local saved = self.Options:GetValue("Saved")
 
     local weapon_id = self:GetWeaponId()
-    local save_weapon_id = self._all_weapons_mode and "__All" or weapon_id
+    local save_weapon_id = self._global_mode and "__All" or weapon_id
     local stance = self:GetWeaponStances()[item.stance_id].data
 
     saved[save_weapon_id] = saved[save_weapon_id] or {}
@@ -332,7 +349,7 @@ function PVM:ResetStance(stance_id)
 
     local stance = self:GetWeaponStances()[stance_id].data
     local saved = self.Options:GetValue("Saved")
-    local save_weapon_id = self._all_weapons_mode and "__All" or weapon_id
+    local save_weapon_id = self._global_mode and "__All" or weapon_id
 
     if saved[save_weapon_id] then
         saved[save_weapon_id][stance_id] = nil
@@ -385,7 +402,7 @@ function PVM:SetStanceFromSave(weapon_id, stance_id, stance)
 	local saved = PVM.Options:GetValue("Saved")
     local saved_weapon = saved[weapon_id]
 
-    if not saved_weapon or (saved_weapon and not saved_weapon[stance_id]) then
+    if self.Options:GetValue("ApplyOnAll") and (not saved_weapon or (saved_weapon and not saved_weapon[stance_id])) then
         saved_weapon = saved.__All
     end
 
