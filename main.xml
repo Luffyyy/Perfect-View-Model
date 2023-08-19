@@ -1,5 +1,5 @@
 <mod name="PerfectViewModel" global_key="PVM" core_class="PVM.lua" min_lib_ver="4.5">
-   <AssetUpdates id="17618" version="2.0.1" provider="modworkshop"/>
+   <AssetUpdates id="17618" version="2.1" provider="modworkshop"/>
 	<Hooks>
 		<hook source_file="lib/managers/weaponfactorymanager" file="WeaponFactoryManager.lua"/>
 	</Hooks>
