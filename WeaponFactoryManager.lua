@@ -32,4 +32,6 @@ function WeaponFactoryManager:get_stances(factory_id, blueprint)
 	return stance_mods
 end
 
-PVM:ReloadStanceTweak()
+Hooks:PostHook(WeaponFactoryManager, "init", "PVMWeaponFactoryManagerInit", function()
+	PVM:ReloadStanceTweak()
+end)

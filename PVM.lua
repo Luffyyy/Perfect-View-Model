@@ -321,12 +321,25 @@ function PVM:ReloadStanceTweak()
         end
     end
 
-    for part_id, data in pairs(tweak_data.weapon.factory) do
-        if data.stance_mods then
-            for factory_id, stance_mod in pairs(data.stance_mods) do
-                local weapon_id = self._weapon_ids_cache[factory_id] or managers.weapon:get_weapon_id_by_factory_id(factory_id)
-                self._weapon_ids_cache[factory_id] = weapon_id
-                PVM:SetStanceFromSave(weapon_id, part_id, stance_mod)
+    local saved_weapon_ids = table.map_keys(PVM.Options:GetValue("Saved"))
+
+    for part_id, data in pairs(tweak_data.weapon.factory.parts) do
+        if data.stance_mod then
+            for _, weapon_id in pairs(saved_weapon_ids) do
+			    local factory_id = self._weapon_ids_cache[weapon_id]
+
+                if not factory_id then
+                    local upgrade = managers.upgrades:weapon_upgrade_by_weapon_id(weapon_id)
+                    if upgrade then
+                        factory_id = upgrade.factory_id
+                    end
+                end
+
+                    if factory_id then
+                    self._weapon_ids_cache[weapon_id] = factory_id
+                    data.stance_mod[factory_id] = data.stance_mod[factory_id] or {translation = Vector3(), rotation = Rotation()}
+                    PVM:SetStanceFromSave(weapon_id, part_id, data.stance_mod[factory_id])
+                end
             end
         end
     end
